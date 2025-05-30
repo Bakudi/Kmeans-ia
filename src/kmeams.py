@@ -80,4 +80,42 @@ legendary_distribution = df.groupby(['Cluster', 'Legendary']).size().unstack(fil
 print("\nDistribución de Pokémon legendarios por cluster:")
 print(legendary_distribution)
 
+# --- 14. Cluster personalizado: Pokémon con ADN de Jefe Final ---
+
+# Definimos umbrales para ser considerado "jefe final"
+# Alto en HP, Attack, Defense o Sp. Atk (top 25%)
+# Bajo en Speed (bottom 25%)
+high_threshold = df[stats_cols].quantile(0.75)
+low_speed_threshold = df['Speed'].quantile(0.25)
+
+# Condición compuesta
+jefes_df = df[
+    ((df['HP'] >= high_threshold['HP']) |
+     (df['Attack'] >= high_threshold['Attack']) |
+     (df['Defense'] >= high_threshold['Defense']) |
+     (df['Sp. Atk'] >= high_threshold['Sp. Atk'])) &
+    (df['Speed'] <= low_speed_threshold)
+].copy()
+
+# Nombre del cluster
+jefes_df['CustomCluster'] = 'ADN de Jefe Final'
+
+print(f"\n🛡️ Pokémon con ADN de Jefe Final ({len(jefes_df)} encontrados):")
+print(jefes_df[['Name', 'HP', 'Attack', 'Defense', 'Sp. Atk', 'Speed']].sort_values(by='HP', ascending=False))
+
+# Visualización en PCA con el resto del dataset
+df['CustomCluster'] = 'Normal'
+df.loc[jefes_df.index, 'CustomCluster'] = 'ADN de Jefe Final'
+
+plt.figure(figsize=(10, 7))
+sns.scatterplot(data=df, x='PCA1', y='PCA2', hue='CustomCluster', palette={'Normal': 'gray', 'ADN de Jefe Final': 'darkred'}, s=80)
+plt.title("Pokémon con ADN de Jefe Final (PCA)")
+plt.xlabel("PCA 1")
+plt.ylabel("PCA 2")
+plt.legend(title='Tipo de Pokémon')
+plt.show()
+
+# Estadísticas promedio de los jefes
+print("\n📊 Estadísticas promedio del cluster 'ADN de Jefe Final':")
+print(jefes_df[stats_cols].mean().round(1))
 
