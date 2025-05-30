@@ -1,6 +1,4 @@
-# 🧠 PokeMeans - Clustering de Pokémon
 
-# --- 1. Importación de librerías ---
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
