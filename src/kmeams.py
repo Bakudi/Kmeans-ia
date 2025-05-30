@@ -119,3 +119,43 @@ plt.show()
 print("\n📊 Estadísticas promedio del cluster 'ADN de Jefe Final':")
 print(jefes_df[stats_cols].mean().round(1))
 
+
+# --- 15. Cluster personalizado: Pokémon con perfil de Estrella Cinematográfica ---
+
+# Calcular total de estadísticas base
+df['TotalStats'] = df[stats_cols].sum(axis=1)
+
+# Umbral alto de stats totales (percentil 85)
+total_threshold = df['TotalStats'].quantile(0.85)
+
+# Tipos visualmente llamativos
+tipos_cine = ['Fire', 'Electric', 'Dragon', 'Psychic', 'Dark', 'Fighting']
+
+# Filtrar Pokémon con alto total de stats, no legendarios, tipo llamativo
+cine_df = df[
+    (df['TotalStats'] >= total_threshold) &
+    (df['Legendary'] == False) &
+    (df['Type 1'].isin(tipos_cine))
+].copy()
+
+# Asignar nombre al cluster
+cine_df['CustomCluster'] = 'Estrella Cinematográfica'
+
+print(f"\n🎬 Pokémon con perfil de Estrella Cinematográfica ({len(cine_df)} encontrados):")
+print(cine_df[['Name', 'Type 1', 'TotalStats'] + stats_cols].sort_values(by='TotalStats', ascending=False))
+
+# Visualización en PCA
+df['CustomCluster2'] = 'Normal'
+df.loc[cine_df.index, 'CustomCluster2'] = 'Estrella Cinematográfica'
+
+plt.figure(figsize=(10, 7))
+sns.scatterplot(data=df, x='PCA1', y='PCA2', hue='CustomCluster2', palette={'Normal': 'gray', 'Estrella Cinematográfica': 'gold'}, s=80)
+plt.title("Pokémon con Perfil de Estrella Cinematográfica (PCA)")
+plt.xlabel("PCA 1")
+plt.ylabel("PCA 2")
+plt.legend(title='Tipo de Pokémon')
+plt.show()
+
+# Estadísticas promedio
+print("\n📊 Estadísticas promedio del cluster 'Estrella Cinematográfica':")
+print(cine_df[stats_cols].mean().round(1))
